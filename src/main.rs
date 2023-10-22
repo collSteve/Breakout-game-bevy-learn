@@ -1,3 +1,5 @@
+use std::f32::consts::PI;
+
 use bevy::{math::*, prelude::*, sprite::collide_aabb::*};
 use rand::Rng;
 
@@ -325,11 +327,12 @@ fn check_ball_collision(
         &Collider,
         Option<&mut Brick>,
         Option<&mut Despawn>,
+        Option<&Paddle>
     )>,
     mut scoreboard: ResMut<Scoreboard>
 ) {
     for (mut ball_velocity, ball_tranform, ball) in &mut ball_query {
-        for (other_transform, other_collider, brick_option, despawn_option) in &mut collider_query {
+        for (other_transform, other_collider, brick_option, despawn_option,paddle_option) in &mut collider_query {
             let collision = collide(
                 ball_tranform.translation,
                 ball.size,
@@ -352,7 +355,21 @@ fn check_ball_collision(
                     ball_velocity.x *= -1.;
                 }
                 if reflect_y {
-                    ball_velocity.y *= -1.;
+                    if let Some(_) = paddle_option {
+                        // reflect ball based on where it hits the paddle
+                        let paddle_left = other_transform.translation.x - other_collider.size.x / 2.;
+                        let paddle_right = other_transform.translation.x + other_collider.size.x / 2.;
+                        let paddle_center = (paddle_left + paddle_right) / 2.;
+                        let ball_center = ball_tranform.translation.x;
+                        let relative_position = (ball_center - paddle_center) / (other_collider.size.x / 2.);
+                        let dir_angle = PI * (relative_position+1.)/2.;
+
+                        let new_dir = vec2(-dir_angle.cos(), -f32::signum(ball_velocity.y)*dir_angle.sin());
+                        ball_velocity.x = new_dir.x * BALL_SPEED;
+                        ball_velocity.y = new_dir.y * BALL_SPEED;
+                    } else {
+                        ball_velocity.y *= -1.;
+                    }
                 }
 
                 if let Some(mut brick) = brick_option {
