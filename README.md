@@ -1,5 +1,5 @@
 # Breakout Game - Bevy learning
-In this project, I implements the classic breakout game from scratch using the (Bevy Game Engine)[https://github.com/bevyengine/bevy].
+In this project, I implements the classic breakout game from scratch using the [Bevy Game Engine](https://github.com/bevyengine/bevy).
 
 This is a learning project I did to start learning about bevy.
 ## Game Play:
